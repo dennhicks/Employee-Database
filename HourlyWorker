@@ -1,0 +1,55 @@
+/**
+ * Subclass of the Employee class. Includes hourly rate, if overtime is allowed, and after
+ * how many hours is overtime calculated.
+ * 
+ * @author D. Hicks 
+ * @version 10/22/14
+ */
+public class HourlyWorker extends Employee{
+    private double rate;
+    private String overtime;
+    private int cap;
+    /**
+     * Constructor for objects of class HourlyWorker
+     */
+    public HourlyWorker(String stype, String name, int id, double r, String o,
+    int c){
+        super(stype, name, id);
+        rate = r;
+        overtime = o;
+        cap = c;
+    }
+    
+    /**
+     * Returns overtime status
+     */
+    public String getOvertime(){
+        return overtime;
+    }
+    
+    /**
+     * Returns payrate
+     */
+    public double getRate(){
+        return rate;
+    }
+    
+    /**
+     * Returns overtime limit
+     */
+    public int getCap(){
+        return cap;
+    }
+    
+    /**
+     * Prints hourly employee
+     */
+    public void print(){
+        super.print();
+        if(cap==0){
+            System.out.printf("\t" + "%13s %.2f %17s"," ",rate,overtime);
+        }else{
+            System.out.printf("\t" + "%13s %.2f %17s %17d"," ",rate,overtime,cap);
+        }
+    }
+}
