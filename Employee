@@ -1,0 +1,49 @@
+/**
+ * Creates employee salary type, name, and id#
+ * 
+ * @author D. Hicks 
+ * @version 10/22/2014
+ */
+public class Employee{
+    private String s;
+    private String n;
+    private int i;
+
+    /**
+     * Constructor for objects of class Employee
+     */
+    public Employee(String stype, String name, int id){
+        s = stype.toUpperCase();
+        n = name;
+        i = id;
+        
+    }
+    
+    /**
+     * Return employee salary type
+     */
+    public String getType(){
+        return s;
+    }
+    
+    /**
+     * Return employee id#
+     */
+    public int getId(){
+        return i;
+    }
+    
+    /**
+     * Return employee name
+     */
+    public String getName(){
+        return n;
+    }
+    
+    /**
+     * Print employee info
+     */
+    public void print(){
+        System.out.printf("%2s %22s %13d", s,n,i);
+        }
+    }
