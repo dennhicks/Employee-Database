@@ -1,0 +1,9 @@
+public class ListIndexOutOfBoundsException
+            extends IndexOutOfBoundsException {
+  /**
+  * Exception for going out of list bounds
+  */
+  public ListIndexOutOfBoundsException() {
+          super("No Employee Found");
+  }  // end constructor
+}  // end ListIndexOutOfBoundsException
