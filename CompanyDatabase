@@ -1,0 +1,403 @@
+/**
+ * Company database performs actions on the employee list.
+ * 
+ * @author D. Hicks 
+ * @version 10/22/14
+ */
+
+import java.util.*;
+import java.io.*;
+
+public class CompanyDataBase{
+    private Employee[] eList;
+    private Employee[] sList;
+    private int numItems;
+    private int max_size;
+    private Scanner reader;
+    private int index;
+    private boolean isFound;
+    /**
+     * Constructor for objects of class Company
+     */
+    public CompanyDataBase() throws IOException{
+        numItems = 0;
+        max_size = 7;
+        isFound = false;
+        eList = this.readEmployees();
+        this.bubbleSort();
+        this.print();
+    }
+    
+    /**
+     * Return employee list
+     */
+    public Employee[] getList(){
+        return eList;
+    }
+    
+    /**
+     * Sort the employee list by id#
+     */
+    public void bubbleSort() {
+        if(numItems==max_size){
+            for (int i = 0; i < max_size; i++) {
+                for (int j = 1; j < max_size; j++) {
+                    if (eList[i].getId()<eList[j-1].getId()) {
+                        // swap elist[j-1] with elist[j]
+                        Employee temp = eList[j-1];
+                        eList[j-1] = eList[i];
+                        eList[i] = temp;
+                    }
+                }
+            }
+        }else{
+            for (int i = 0; i < numItems; i++) {
+                for (int j = 1; j < numItems-1; j++) {
+                    if (eList[i].getId()<eList[j-1].getId()) {
+                        // swap elist[j-1] with elist[j]
+                        Employee temp = eList[j-1];
+                        eList[j-1] = eList[i];
+                        eList[i] = temp;
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Read in employee list from EmployeeData text file
+     */
+    public Employee[] readEmployees() throws IOException{
+        Scanner reader = new Scanner(new File("EmployeeData.txt"));
+        Employee[] tList = new Employee[max_size];
+        int i = 0;
+        try{
+            while (reader.hasNextLine()){
+                tList[i] = (this.readFromScanner(reader));
+                i++;
+            } 
+        }finally{
+            reader.close();
+        }
+        return tList;
+    }
+    /**
+     * Determin employee type and contruct subclasses accordingly
+     */
+
+    public Employee readFromScanner(Scanner scanner){
+        int cap;
+        String stype = scanner.next();
+        String name = scanner.next();
+        int id = scanner.nextInt();
+        
+        if (stype.equals("S")){
+            int salary = scanner.nextInt();
+            numItems++;
+            return new SalaryWorker(stype, name, id, salary);
+        }else{
+            double rate = scanner.nextDouble();
+            String overtime = scanner.next();
+            if(scanner.hasNextInt()){
+                cap = scanner.nextInt();
+            }else{
+                cap = 0;
+            }
+            numItems++;
+            return new HourlyWorker(stype, name, id, rate, overtime, cap);
+        }
+        
+    }
+
+    /**
+     * Return true if list is empty
+     */
+    public boolean isEmpty() {
+        return (numItems == 0);
+    } // end isEmpty
+    
+    /**
+     * Return number of employees in the list
+     */
+    public int size() {
+        return numItems;
+    }  // end size
+    
+    /**
+     * Remove all employees from the list
+     */
+    public boolean isHourly(int i) {
+        boolean h = false;
+        int j = this.find(0, numItems, i);
+        
+        if(eList[j].getType().equalsIgnoreCase("h")){
+            h = true;
+        }
+        
+        return h;
+    }
+    
+    /**
+     * Adds and employee to the list
+     */
+    public void add(Employee nEmployee){
+          if (numItems == max_size) {
+            this.expandCapacity();
+            eList[numItems] = nEmployee;
+            numItems++;
+          }else{
+               eList[numItems] = nEmployee;
+               numItems++;
+          }
+         this.bubbleSort();
+    } //end add
+
+    /**
+     * Binary search of the employee list
+     * Return user entered employee by id#
+     */
+    public int find(int first, int last, int i){
+        int index=0;
+        int id = i;
+        isFound = false;
+        if(first>last){
+            isFound = false;
+            index = -1;
+        }else{
+            int mid = (first+last)/2;
+                if(id==eList[mid].getId()){
+                    index=mid;
+                    isFound = true;
+            }else if(id<eList[mid].getId()){
+                index = find(first, mid-1, id);
+            }else{
+                index = find(mid+1, last, id);
+            }
+        }
+        
+        return index;
+    }
+    
+    /**
+     * Contruct and return new list of salary workers 
+     */
+    public Employee[] setSalary(){
+        int a =0;
+        int j =0;
+        //counts number of salaried workers
+        for(int i = 0;i<numItems;i++){
+            if(eList[i].getType().equalsIgnoreCase("s")){
+                a++;
+            }
+            
+        }
+        //sets new list at size of salaried workers
+        sList = new Employee [a];
+        //populates new list with salaried workers
+            for(int n = 0; n<numItems;n++){
+            if(eList[n].getType().equalsIgnoreCase("s")){
+                sList[j] = eList[n];
+                j++;
+            }
+        }
+            
+        return sList;
+    }
+    
+    /**
+     * Calculates hourly rates
+     */
+    public double findWeeklySalary(int i, int h){
+        int id = i;
+        int hours = h;
+        int emp = this.find(0, numItems, id);
+        String overtime = ((HourlyWorker) eList[emp]).getOvertime();
+        double rate = ((HourlyWorker) eList[emp]).getRate();
+        int cap = ((HourlyWorker) eList[emp]).getCap();
+        double weekSalary = 0;
+            if(overtime.equalsIgnoreCase("yes") && hours>cap){
+                weekSalary = rate*1.5*(hours-cap) + rate*cap;
+            }else if (overtime.equalsIgnoreCase("yes") && hours<=cap){
+                weekSalary = rate*hours;
+            }else{
+                weekSalary = rate*hours;
+            }
+        return weekSalary;
+    }
+    
+        /**
+         * Search list of salary workers for user entered salary
+         */
+    public int findSalary(Employee [] sList, int first, int last, int sal){
+        int index=0;
+        isFound = false;
+        if(first>last){
+            index = -1;
+           isFound = false;
+        }else{
+            int mid = (first+last)/2;
+                if(sal == ((SalaryWorker) sList[mid]).getSalary()){
+                    index=mid;
+                    isFound = true;
+        }else if(sal<((SalaryWorker) sList[mid]).getSalary()){
+                index = findSalary(sList, first, mid-1, sal);
+        }else{
+                index = findSalary(sList, mid+1, last, sal);
+            }
+        }
+        
+        return index;
+    }
+    /**
+     * Remove user entered employee by id#
+     */
+    public void remove(int match)throws ListIndexOutOfBoundsException {
+        //Search for employee id
+        try{index = this.find(0, numItems, match);
+        }
+        catch (ListIndexOutOfBoundsException err){
+            System.out.println("No Employee Found");
+            System.out.println(err);
+        }
+        System.out.println();
+        //Removes desired employee if found or throws exception
+        if(index==max_size){
+            eList[index] = null;
+            numItems--;
+        }
+        else if (index >= 0 && index < max_size) {
+            // delete item by shifting all items at
+            // positions > index toward the beginning of the list
+            // (no shift if index == size)
+            for (int i = index+1; i <= eList.length-1; i++) {
+                    eList[i-1] = eList[i];
+            }  // end for
+            numItems--;
+        } // end if
+    } // end remove
+    
+    /**
+     * Prints the employee list
+     */
+    public void print(){
+        this.printHead();
+        for(int i=0;i<eList.length;i++){
+            if(eList[i]==null){
+                System.out.print("");
+            }else{
+                eList[i].print();     
+            }
+            System.out.println();// blank for clarity
+        }
+        for (int i=0;i<5;i++) System.out.println();
+    }
+    
+    /**
+     * Expands the array size if full on an add
+     */
+    public void expandCapacity(){
+        Employee[] jList = eList;
+        Employee[] nList = new Employee[max_size+1];
+        for(int i=0; i<max_size;i++){
+            nList[i] = jList[i];
+        }
+        max_size++;
+        eList = new Employee [max_size];
+        eList = nList;
+    }
+    
+    /**
+     * Flag for search
+     */
+    public boolean foundIt(){
+        return isFound;
+    }
+    
+    /**
+     * Prints a searched salary item
+     */
+    public void printSalSearch(int e){
+        if(this.foundIt()){
+            System.out.printf("%68s %n %n","-------- Search Results --------");
+            this.printHead();
+            sList[e].print();
+        }else{
+            System.out.printf("%68s %n %n","-------- Search Results --------");
+            System.out.printf("%61s %n","Employee not found");
+            System.out.println();
+        }
+    }
+    
+    /**
+     * Prints a searched item
+     */
+    public void printSearch(int e){
+        if(this.foundIt()){
+            System.out.printf("%68s %n %n","-------- Search Results --------");
+            this.printHead();
+            eList[e].print();
+        }else{
+            System.out.printf("%68s %n %n","-------- Search Results --------");
+            System.out.printf("%61s %n","Employee not found");
+            System.out.println();
+        }
+    }
+    
+    /**
+     * Prints heading of the employee list
+     */
+    
+    public void printHead(){
+        System.out.printf("%s %15s %20s %20s %15s %20s %n","Type", "Name",
+        "ID Number","Salary/Hourly","Overtime","Overtime Cap");
+        System.out.println();
+    }
+    
+    /**
+     * Cronverts list to strings to be printed
+     */
+    public String toString(Employee [] list, int i){
+        StringBuilder result = new StringBuilder();
+         if(list[i].getType().equals("S")){
+             String type = list[i].getType().toString();
+             String name = list[i].getName().toString();
+             int id = list[i].getId();
+             int sal = ((SalaryWorker) list[i]).getSalary();
+             result.append(String.format("%2s",type));
+             result.append(String.format("%22s",name));
+             result.append(String.format("%15d",id));
+             result.append(String.format("\t" + "\t" + "%10d",sal));
+         }else{
+             String type = list[i].getType().toString();
+             String name = list[i].getName().toString();
+             int id = list[i].getId();
+             double rate = ((HourlyWorker) list[i]).getRate();
+             String over = ((HourlyWorker) list[i]).getOvertime();
+             result.append(String.format("%2s",type));
+             result.append(String.format("%22s",name));
+             result.append(String.format("%15d",id));
+             result.append(String.format("\t" + "%13s %.2f"," ",rate));
+             result.append(String.format("%17s", over));
+             if(over.equals("yes")){
+                 int cap = ((HourlyWorker) list[i]).getCap();
+                 result.append(String.format("%17d",cap));
+                }
+            }
+            return result.toString();
+    }
+    /**
+     * Prints the list to text file
+     */
+    public void printListText(String filename) throws IOException{
+        PrintWriter outfile;
+        outfile = new PrintWriter(new FileWriter(filename, true));
+        outfile.printf("%s %15s %20s %20s %15s %20s %n","Type", "Name",
+        "ID Number","Salary/Hourly","Overtime","Overtime Cap");
+        outfile.println();
+          for (int i = 0 ; i < eList.length-1 ; ++i) {
+             String items = this.toString(eList, i);
+             outfile.println(items);  
+          }
+        outfile.close();
+    }
+}
