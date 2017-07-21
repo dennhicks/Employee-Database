@@ -1,0 +1,33 @@
+/**
+ * Subclass of the Employee class that includes a salary.
+ * 
+ * @author D. Hicks 
+ * @version 10/22/14
+ */
+public class SalaryWorker extends Employee{
+    private int salary;
+
+    /**
+     * Constructor for objects of class SalaryWorker
+     */
+    public SalaryWorker(String stype, String name, int id, int s){
+        super(stype, name, id);
+        salary = s;
+        
+    }
+    
+    /**
+     * Returns salary
+     */
+    public int getSalary(){
+        return salary;
+    }
+    
+    /**
+     * Prints salary employee
+     */
+    public void print(){
+        super.print();
+        System.out.printf("\t" + "\t" + "%10d",salary);
+    }
+}
