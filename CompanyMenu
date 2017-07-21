@@ -1,0 +1,162 @@
+/**
+ * Client view menu controller.
+ * Takes in user input and controls the CompanyDataBase.
+ * 
+ * @author D. Hicks
+ * @version 10/22/14
+ */
+import java.util.*;
+import java.io.*;
+public class CompanyMenu{ 
+    /**
+     * Constructs the user menu and controls the CompanyDataBase
+     */
+    public void userMenu() throws IOException{
+        CompanyDataBase db = new CompanyDataBase();
+        int userChoice = 0; //standard default choice
+        int sChecker;
+        int id;
+        int items;
+        int find;
+        Scanner kbd;
+        //user prompt
+        System.out.println("Please Enter Your Choice");
+        System.out.println();
+        
+        while (userChoice!=7){
+            System.out.println("1. Find An Employee"); 
+            System.out.println("2. Add An Employee");
+            System.out.println("3. Remove An Employee");
+            System.out.println("4. Print The Employee List");
+            System.out.println("5. Find by Salary");
+            System.out.println("6. Calculate Hourly Salary");
+            System.out.println("7. Exit The Program");
+            System.out.println();// blank for clarity
+            kbd = new Scanner(System.in);
+            userChoice = kbd.nextInt();
+            if (userChoice == 1){
+                System.out.print("Please enter employee id# ");
+                id = kbd.nextInt();
+                System.out.println();
+                items = db.size()-1;
+                find = db.find(0, items, id);
+                db.printSearch(find);
+
+                for (int i=0;i<5;i++) System.out.println();
+            } else if (userChoice == 2){
+                int subChoice = 0;
+                while(subChoice!=-1){
+                    String sType = null;
+                    String name = null;
+                    System.out.print("Please enter employee id#. (xxxxxx) ");
+                    id = kbd.nextInt();
+                    items = db.size()-1;
+                    db.find(0, items, id);
+                if(db.foundIt()){
+                    System.out.println("Employee is already in the database");
+                    for (int i=0;i<5;i++) System.out.println();
+                    break;
+                }else{
+                
+                    System.out.print("Please enter employee salary type. (s/h) ");
+                    sType = kbd.next();
+                    System.out.print("Please enter employee name. (last,first - no spaces) ");
+                    name = kbd.next();
+                    
+                    
+                        if(sType.equalsIgnoreCase("s")){
+                            System.out.print("Please enter employee's salary ");
+                            int s = kbd.nextInt();
+                            Employee nEmployee = new SalaryWorker(sType, name, id, s);
+                            db.add(nEmployee);
+                            subChoice = -1;
+                        }else if(sType.equalsIgnoreCase("h")){
+                            System.out.print("Please enter employee's hourly rate. (x.xx) ");
+                            double h = kbd.nextDouble();
+                            System.out.print("Is employee allowed overtime? (yes/no) ");
+                            String overtime = kbd.next();
+                            if(overtime.equalsIgnoreCase("yes")){
+                            System.out.print("What is the overtime cap? (hours) ");
+                            int cap = kbd.nextInt();
+                            Employee nEmployee = new HourlyWorker(sType, name, id, h, overtime, cap);
+                            db.add(nEmployee);
+                            subChoice = -1;
+                        }else if(overtime.equalsIgnoreCase("no")){
+                            int cap = 0;
+                            Employee nEmployee = new HourlyWorker(sType, name, id, h, overtime, cap);
+                            db.add(nEmployee);
+                            subChoice = -1;
+                        
+                        }else{
+                            System.out.println("Invalid entry ");
+                        }
+                    }
+                    
+                }for (int i=0;i<5;i++) System.out.println();
+            }   
+            } else if (userChoice == 3){
+                System.out.print("Please enter the employee id you wish to remove: ");
+                kbd = new Scanner(System.in);
+                id = kbd.nextInt();
+                System.out.println();
+                items = db.size()-1;
+                find = db.find(0, items, id);
+                db.printSearch(find);
+                db.remove(id);
+                System.out.println();
+                System.out.printf("%69s %n %n","-------- Has Been Removed --------");
+                for (int i=0;i<5;i++) System.out.println();
+            } else if (userChoice == 4){
+                db.bubbleSort();
+                db.print();
+            }   
+             else if (userChoice == 5){
+                System.out.print("Please enter employee salary: ");
+                sChecker = kbd.nextInt();
+                System.out.println();
+                Employee [] temp;
+                temp = db.setSalary();
+                int nItems = temp.length;
+                find = db.findSalary(temp,0, nItems, sChecker);
+                db.printSalSearch(find);
+                for (int i=0;i<5;i++) System.out.println();
+            }else if (userChoice == 6){
+                int subChoice = 0;
+                while(subChoice!=-1){
+                    System.out.print("Please enter employee id#: ");
+                    id = kbd.nextInt();
+                    System.out.println();
+                    items = db.size()-1;
+                    find = db.find(0, items, id);
+                    System.out.println();
+                    if(db.foundIt() && db.isHourly(id)){
+                        System.out.print("Please enter employee's hours ");
+                        int h = kbd.nextInt();
+                        double wSal = db.findWeeklySalary(id, h);
+                        System.out.printf("%.2f %n", wSal);
+                        subChoice = -1;
+                    }else if(db.foundIt()){
+                        System.out.println("Employee is not hourly");
+                        System.out.println();
+                    }else{
+                        System.out.println("Employee not in database ");
+                        System.out.println();
+                    }
+                    
+                }for (int i=0;i<5;i++) System.out.println();
+            }   
+            else if (userChoice == 7){
+                System.out.print("Thank you for using the Company Database. Good Bye.");
+                for (int i=0;i<5;i++) System.out.println();
+            } 
+            else {
+                System.out.println("Error. Invalid input. Try again.");
+                for (int i=0;i<5;i++) System.out.println();
+            }
+            
+        }
+        //print list to file upon exit
+            db.printListText("OUTPUT.TXT");
+    }
+    
+}
