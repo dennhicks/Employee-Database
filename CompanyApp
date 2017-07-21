@@ -1,0 +1,16 @@
+/**
+ * Starts the Program.
+ * 
+ * @author D. Hicks 
+ * @version 10/22/14
+ */
+import java.io.*;
+public class CompanyApp{
+    /**
+     * Starts new Company Data Base
+     */
+        public static void main(String[] args)throws IOException{
+        CompanyMenu cControl = new CompanyMenu();
+        cControl.userMenu();
+    }
+}
